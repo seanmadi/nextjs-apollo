@@ -1,11 +1,12 @@
 {
-	"image": "docker.io/node:lts",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"esbenp.prettier-vscode",
-				"dbaeumer.vscode-eslint"
-			]
-		}
-	}
+  "image": "docker.io/node:lts",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "GraphQL.vscode-graphql"
+      ]
+    }
+  }
 }

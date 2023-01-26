@@ -1,22 +1,11 @@
 import Head from "next/head"
-import { useQuery, gql } from "@apollo/client"
-import { GetArtistsQuery } from "@/gql/graphql"
 
-const GET_ARTISTS = gql`
-  query GetArtists {
-    artists {
-      id
-      firstName
-      lastName
-    }
-  }
-`
+import { Login } from "@/components/login"
+import { Artists } from "@/components/artists"
+import { useAuth } from "@/lib/auth"
 
 export default function Home() {
-  const { loading, error, data } = useQuery<GetArtistsQuery>(GET_ARTISTS)
-
-  if (loading) return <p>Loading...</p>
-  if (error) return <p>Error: {error.message}</p>
+  const { isSignedIn, signOut } = useAuth()
 
   return (
     <>
@@ -28,14 +17,21 @@ export default function Home() {
       </Head>
       <main>
         <div>
-          {data && (
-            <ul>
-              {data.artists.map((artist) => (
-                <li key={artist.id}>
-                  {artist.firstName} {artist.lastName}
-                </li>
-              ))}
-            </ul>
+          {isSignedIn() ? (
+            <>
+              <Artists />
+              <a
+                href="#"
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.preventDefault
+                  signOut()
+                }}
+              >
+                Logout
+              </a>
+            </>
+          ) : (
+            <Login />
           )}
         </div>
       </main>
