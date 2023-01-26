@@ -1,0 +1,11 @@
+{
+	"image": "docker.io/node:lts",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"dbaeumer.vscode-eslint"
+			]
+		}
+	}
+}
