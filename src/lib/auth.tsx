@@ -1,4 +1,10 @@
-import React, { useState, useContext, createContext, ReactNode } from "react"
+import React, {
+  useState,
+  useContext,
+  createContext,
+  ReactNode,
+  useEffect,
+} from "react"
 import {
   ApolloProvider,
   ApolloClient,
@@ -8,6 +14,8 @@ import {
   concat,
   ApolloLink,
 } from "@apollo/client"
+import { onError } from "@apollo/client/link/error"
+
 import { UserLoginMutation } from "@/gql/__generated__/schema"
 
 const authContext = createContext<ReturnType<typeof useProvideAuth>>(
@@ -37,8 +45,37 @@ type AuthCredentials = {
 }
 
 function useProvideAuth() {
-  const [authCredentials, setAuthCredentials] =
+  const getAuthCredentials = (): AuthCredentials | null => {
+    // check if SSR
+    if (typeof window === "undefined") return null
+
+    const maybeAuthCreds = window.localStorage.getItem("authCredentials")
+    if (maybeAuthCreds) {
+      return JSON.parse(maybeAuthCreds) as AuthCredentials
+    } else {
+      return null
+    }
+  }
+
+  const [authCredentials, setAuthCredentialsInState] =
     useState<AuthCredentials | null>(null)
+  // call setAuthCredentialsInState in useEffect to set default value
+  // in order to avoid SSR hydration error
+  useEffect(() => setAuthCredentialsInState(getAuthCredentials()), [])
+
+  const setAuthCredentials = (authCredentials: AuthCredentials | null) => {
+    if (authCredentials) {
+      window.localStorage.setItem(
+        "authCredentials",
+        JSON.stringify(authCredentials)
+      )
+
+      setAuthCredentialsInState(authCredentials)
+    } else {
+      window.localStorage.removeItem("authCredentials")
+      setAuthCredentialsInState(null)
+    }
+  }
 
   const isSignedIn = () => {
     if (authCredentials) {
@@ -66,8 +103,19 @@ function useProvideAuth() {
       return forward(operation)
     })
 
+    const resetToken = onError((error) => {
+      if (
+        error &&
+        error.graphQLErrors?.some((val) =>
+          val.message.includes("requires authentication")
+        )
+      ) {
+        signOut()
+      }
+    })
+
     return new ApolloClient({
-      link: concat(authMiddleware, httpLink),
+      link: concat(concat(authMiddleware, resetToken), httpLink),
       cache: new InMemoryCache(),
     })
   }
@@ -127,7 +175,6 @@ function useProvideAuth() {
   }
 
   return {
-    setAuthCredentials,
     isSignedIn,
     signIn,
     signOut,
