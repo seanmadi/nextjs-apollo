@@ -1,18 +1,7 @@
-import { useQuery, gql } from "@apollo/client"
-import { GetArtistsQuery } from "@/gql/__generated__/graphql"
-
-const GET_ARTISTS = gql`
-  query GetArtists {
-    artists {
-      id
-      firstName
-      lastName
-    }
-  }
-`
+import { useGetArtistsQuery } from "@/gql/__generated__/schema"
 
 export const Artists = () => {
-  const { loading, error, data } = useQuery<GetArtistsQuery>(GET_ARTISTS)
+  const { loading, error, data } = useGetArtistsQuery()
 
   if (loading) return <p>Loading...</p>
   if (error) return <p>Error: {error.message}</p>

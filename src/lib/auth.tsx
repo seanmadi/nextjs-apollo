@@ -8,8 +8,7 @@ import {
   concat,
   ApolloLink,
 } from "@apollo/client"
-import { setContext } from "@apollo/client/link/context"
-import { UserLoginMutation } from "@/gql/__generated__/graphql"
+import { UserLoginMutation } from "@/gql/__generated__/schema"
 
 const authContext = createContext<ReturnType<typeof useProvideAuth>>(
   {} as ReturnType<typeof useProvideAuth>
