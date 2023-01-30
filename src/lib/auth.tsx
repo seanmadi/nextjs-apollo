@@ -92,21 +92,33 @@ function useProvideAuth() {
       }
     `
 
-    const result = await client.mutate<UserLoginMutation>({
-      mutation: LoginMutation,
-      variables: { email: username, password },
-    })
-
-    if (
-      result?.data?.userLogin?.credentials?.accessToken &&
-      result?.data?.userLogin?.credentials?.client &&
-      result?.data?.userLogin?.credentials?.uid
-    ) {
-      setAuthCredentials({
-        accessToken: result.data.userLogin.credentials.accessToken,
-        client: result.data.userLogin.credentials.client,
-        uid: result.data.userLogin.credentials.uid,
+    try {
+      const result = await client.mutate<UserLoginMutation>({
+        mutation: LoginMutation,
+        variables: { email: username, password },
       })
+
+      if (
+        result?.data?.userLogin?.credentials?.accessToken &&
+        result?.data?.userLogin?.credentials?.client &&
+        result?.data?.userLogin?.credentials?.uid
+      ) {
+        const credentials = {
+          accessToken: result.data.userLogin.credentials.accessToken,
+          client: result.data.userLogin.credentials.client,
+          uid: result.data.userLogin.credentials.uid,
+        }
+        setAuthCredentials(credentials)
+        return {
+          data: credentials,
+          error: null,
+        }
+      }
+    } catch (e) {
+      return {
+        data: null,
+        error: (e as { message: string }).message,
+      }
     }
   }
 
